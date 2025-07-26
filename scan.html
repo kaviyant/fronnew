@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Menu</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; padding: 30px; max-width: 700px; margin: auto; text-align: center; }
+    h2, h3 { color: #333; }
+    ul { padding: 0; list-style: none; }
+    li { background: white; margin: 10px 0; padding: 10px; border-radius: 8px; text-align: left; }
+    input[type="checkbox"] { margin-right: 10px; }
+    .bill { white-space: pre-wrap; background: #fff; padding: 10px; margin-top: 20px; border-radius: 8px; }
+    input, button { margin: 10px; padding: 10px; width: 90%; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2 id="shopName"></h2>
+  <h3>Available Menu</h3>
+  <ul id="menu"></ul>
+
+  <h3>Place Your Order</h3>
+  <input type="text" id="custName" placeholder="Your Name">
+  <button onclick="placeOrder()">Submit Order</button>
+  <div id="result" class="bill"></div>
+
+  <script>
+    const shop = new URLSearchParams(window.location.search).get("shop");
+    document.getElementById("shopName").innerText = `Menu for Shop: ${shop}`;
+
+    async function fetchMenu() {
+      const res = await fetch(`http://localhost:5000/api/menu/${shop}`);
+      const menu = await res.json();
+
+      const ul = document.getElementById("menu");
+      menu.forEach((item, i) => {
+        if (item.count > 0) {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <label><input type="checkbox" id="item${i}" value="${item.name}|${item.price}">${item.name} - ₹${item.price} | Left: ${item.count}</label>
+          `;
+          ul.appendChild(li);
+        }
+      });
+    }
+
+    function placeOrder() {
+      const name = document.getElementById("custName").value;
+      const checked = Array.from(document.querySelectorAll("input[type='checkbox']:checked"));
+      if (!name || checked.length === 0) {
+        return document.getElementById("result").innerText = "Fill name and select items.";
+      }
+
+      let total = 0;
+      const items = checked.map(c => {
+        const [item, price] = c.value.split('|');
+        total += +price;
+        return `${item} - ₹${price}`;
+      });
+
+      const bill = `Customer: ${name}\n\nItems Ordered:\n${items.join("\n")}\n\nTotal: ₹${total}`;
+      document.getElementById("result").innerText = bill;
+    }
+
+    fetchMenu();
+  </script>
+</body>
+</html>
