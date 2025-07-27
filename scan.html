@@ -24,14 +24,17 @@
   <div id="result" class="bill"></div>
 
   <script>
+    const backend = "https://qrstreet-backend.onrender.com";
     const shop = new URLSearchParams(window.location.search).get("shop");
     document.getElementById("shopName").innerText = `Menu for Shop: ${shop}`;
 
     async function fetchMenu() {
-      const res = await fetch(`http://localhost:5000/api/menu/${shop}`);
+      const res = await fetch(`${backend}/api/menu/${shop}`);
       const menu = await res.json();
 
       const ul = document.getElementById("menu");
+      ul.innerHTML = "";
+
       menu.forEach((item, i) => {
         if (item.count > 0) {
           const li = document.createElement("li");
