@@ -2,18 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Customer Scan Page</title>
+  <title>Customer Menu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: #f0f0f0;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: white;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
 </head>
 <body>
-  <h1>🧾 Customer Menu</h1>
-  <p id="output">Loading menu...</p>
+  <h2>📋 Menu</h2>
+  <ul id="menu">
+    <li>Loading menu...</li>
+  </ul>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const shopID = params.get("shop");
+    const backend = "https://qrnew-z3il.onrender.com"; // ✅ Your backend URL
 
-    if (!shopID) {
-      document.getElementById("output").textContent = "Shop ID not found in URL.";
-    } else {
-      fetch(`https://qrnew-z3il.onrender.com/api/menu/${shopID}`)
-        .then(res => res.json()
+    const urlParams = new URLSearchParams(window.location.search);
+    const shopID = urlParams.get("shop");
+
+    async function loadMenu() {
+      if (!shopID) {
+        document.getElementById("menu").innerHTML = "<li class='error'>❌ No shop ID provided in URL</li>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${backend}/api/menu?shopID=${shopID}`);
+        const data = await res.json();
+
+        const list = document.getElementById("menu");
+        list.innerHTML = "";
+
+        if (data.error) {
+          list.innerHTML = `<li class='error'>❌ ${data.error}</li>`;
+          return;
+        }
+
+        if (data.length === 0) {
+          list.innerHTML = "<li>No items found for this shop.</li>";
+          return;
+        }
+
+        data.forEach(item => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${item.name}</strong><br>₹${item.price} &nbsp;|&nbsp; Available: ${item.count}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        document.getElementById("menu").innerHTML = "<li class='error'>❌ Failed to fetch menu</li>";
+        console.error(err);
+      }
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>
