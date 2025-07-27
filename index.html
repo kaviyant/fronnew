@@ -28,12 +28,13 @@
   <img id="qrCode" />
 
   <script>
+    const backend = "https://qrstreet-backend.onrender.com";
     let shopID = '';
 
     async function fetchMenu() {
       if (!shopID) return;
 
-      const res = await fetch(`http://localhost:5000/api/menu/${shopID}`);
+      const res = await fetch(`${backend}/api/menu/${shopID}`);
       const menu = await res.json();
       const list = document.getElementById("menuList");
       list.innerHTML = "";
@@ -60,18 +61,18 @@
 
       if (!name || !price || !count || !shopID) return alert("All fields required!");
 
-      await fetch("http://localhost:5000/api/menu", {
+      await fetch(`${backend}/api/menu`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, price, count, shopID })
       });
 
-      document.getElementById("qrCode").src = `http://localhost:5000/qr?shop=${shopID}`;
+      document.getElementById("qrCode").src = `${backend}/qr?shop=${shopID}`;
       fetchMenu();
     }
 
     async function deleteItem(id) {
-      await fetch(`http://localhost:5000/api/menu/${id}`, { method: "DELETE" });
+      await fetch(`${backend}/api/menu/${id}`, { method: "DELETE" });
       fetchMenu();
     }
 
@@ -81,7 +82,7 @@
       const newCount = prompt("Edit count:", count);
 
       if (newName && newPrice && newCount) {
-        await fetch(`http://localhost:5000/api/menu/${id}`, {
+        await fetch(`${backend}/api/menu/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: newName, price: +newPrice, count: +newCount })
